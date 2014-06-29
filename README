@@ -26,6 +26,15 @@ of tubes' buried jobs all at once.
 beanstalkd > use fix flux
 beanstalkd [fix, flux] > clear buried
 
+The 'list' command shows the status of each selected tube - or if none
+is selected - the status of all available tubes.
+beanstalkd [fix, flux] > list
+
+              paused       ready/delayed/buried     waiting/watching/using
+--------------------------------------------------------------------------
+  fix            10s                 20 / 3 / 1              1 (1) / 0 / 0
+  flux             -                101 / 5 / 0              0 (2) / 2 / 0
+
 Copyright & License
 -------------------
 Cute is Copyright (c) 2014 David Persson if not otherwise stated. The code
