@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -19,6 +20,7 @@ var (
 		"inspect-tube",
 		"kick-tube",
 		"clear-tube",
+		"pause-tube",
 		"kick-job",
 		"inspect-job",
 	}
@@ -44,6 +46,9 @@ kick-tube <tube> [<bound=10>]
 
 clear-tube <tube> [<state=buried>]
 	Delete all jobs in given state and tube.
+
+pause-tube <tube> <delay>
+	Pause tube for given number of seconds.
 
 inspect-job <job>
 	Inspects a job.
@@ -92,7 +97,7 @@ func main() {
 				c = append(c, cmd)
 			}
 		}
-		for _, cmd := range []string{"inspect-tube", "kick-tube", "clear-tube"} {
+		for _, cmd := range []string{"inspect-tube", "kick-tube", "clear-tube", "pause-tube"} {
 			if strings.HasPrefix(line, cmd) {
 				tubes, _ := conn.ListTubes()
 
@@ -127,6 +132,23 @@ func main() {
 					continue
 				}
 				inspectTube(parts[1])
+			case strings.HasPrefix(input, "pause-tube"):
+				var tube string = "default"
+				var delay time.Duration
+
+				parts := strings.Split(input, " ")
+				if len(parts) < 3 {
+					fmt.Printf("Error: no tube name or delay given.\n")
+					continue
+				}
+				if len(parts) > 1 {
+					tube = parts[1]
+				}
+				if len(parts) > 2 {
+					r, _ := strconv.ParseUint(parts[2], 0, 0)
+					delay = time.Duration(r) * time.Second
+				}
+				pauseTube(tube, delay)
 			case strings.HasPrefix(input, "kick-tube"):
 				var tube string = "default"
 				var bound int = 10

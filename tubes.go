@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/kr/beanstalk"
+	"time"
 )
 
 func listTubes() {
@@ -41,8 +42,13 @@ func inspectTube(name string) {
 func kickTube(name string, bound int) {
 	tube := beanstalk.Tube{conn, name}
 	tube.Kick(bound)
-
 	fmt.Printf("Kicked jobs in tube %s.\n", name)
+}
+
+func pauseTube(name string, delay time.Duration) {
+	tube := beanstalk.Tube{conn, name}
+	tube.Pause(delay)
+	fmt.Printf("Paused tube %s for %v.\n", name, delay)
 }
 
 func clearTube(name string, state string) {
