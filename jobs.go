@@ -42,6 +42,7 @@ func printJob(id uint64, body []byte, stats map[string]string) {
 	fmt.Printf("%25s:\n---------------------\n%s\n---------------------\n", "body", body)
 
 	var include = []string{
+		"tube",
 		"age",
 		"reserves",
 		"kicks",
