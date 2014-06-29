@@ -87,14 +87,14 @@ func cleanup() {
 func main() {
 	fmt.Print("Enter 'help' for available commands and 'exit' to quit.\n\n")
 
+	// Setup connection to server.
 	var err error
 	if conn, err = beanstalk.Dial("tcp", "127.0.0.1:11300"); err != nil {
 		panic("Failed to connect to beanstalkd server.")
 	}
-	line = liner.NewLiner()
-	sigc = make(chan os.Signal, 1)
 
 	// Register signal handler.
+	sigc = make(chan os.Signal, 1)
 	signal.Notify(sigc, os.Interrupt)
 	go func() {
 		for sig := range sigc {
@@ -103,6 +103,9 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	//
+	line = liner.NewLiner()
 
 	// Autocomplete commands, tube names and states.
 	line.SetCompleter(func(line string) (c []string) {
