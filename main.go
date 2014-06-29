@@ -133,41 +133,32 @@ func main() {
 				}
 				inspectTube(parts[1])
 			case strings.HasPrefix(input, "pause-tube"):
-				var tube string = "default"
-				var delay time.Duration
-
 				parts := strings.Split(input, " ")
 				if len(parts) < 3 {
 					fmt.Printf("Error: no tube name or delay given.\n")
 					continue
 				}
-				if len(parts) > 1 {
-					tube = parts[1]
-				}
-				if len(parts) > 2 {
-					r, _ := strconv.ParseUint(parts[2], 0, 0)
-					delay = time.Duration(r) * time.Second
-				}
+				tube := parts[1]
+				r, _ := strconv.ParseUint(parts[2], 0, 0)
+				delay := time.Duration(r) * time.Second
+
 				pauseTube(tube, delay)
 			case strings.HasPrefix(input, "kick-tube"):
-				var tube string = "default"
 				var bound int = 10
 
 				parts := strings.Split(input, " ")
-				if len(parts) < 3 {
-					fmt.Printf("Error: no tube name or bound given.\n")
+				if len(parts) < 2 { // bound is optional
+					fmt.Printf("Error: no tube name given.\n")
 					continue
 				}
-				if len(parts) > 1 {
-					tube = parts[1]
-				}
+				tube := parts[1]
+
 				if len(parts) > 2 {
 					b, _ := strconv.ParseInt(parts[2], 0, 0)
 					bound = int(b)
 				}
 				kickTube(tube, bound)
 			case strings.HasPrefix(input, "clear-tube"):
-				var tube string = "default"
 				var state string = "buried"
 
 				parts := strings.Split(input, " ")
@@ -175,25 +166,21 @@ func main() {
 					fmt.Printf("Error: no tube name given.\n")
 					continue
 				}
-				if len(parts) > 1 {
-					tube = parts[1]
-				}
+				tube := parts[1]
+
 				if len(parts) > 2 {
 					state = parts[2]
 				}
 				clearTube(tube, state)
 			case strings.HasPrefix(input, "inspect-job"):
-				var id uint64
-
 				parts := strings.Split(input, " ")
 				if len(parts) < 2 {
 					fmt.Printf("Error: no job id given.\n")
 					continue
 				}
-				if len(parts) > 1 {
-					r, _ := strconv.ParseInt(parts[1], 0, 0)
-					id = uint64(r)
-				}
+				r, _ := strconv.ParseInt(parts[1], 0, 0)
+				id := uint64(r)
+
 				inspectJob(id)
 			}
 			line.AppendHistory(input)
