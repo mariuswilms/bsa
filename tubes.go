@@ -31,11 +31,11 @@ func listTubes() {
 		)
 		wf = fmt.Sprintf(
 			"%d / %d / %d",
-			castStatsValue(stats["current-jobs-waiting"]),
-			castStatsValue(stats["current-jobs-watching"]),
-			castStatsValue(stats["current-jobs-using"]),
+			castStatsValue(stats["current-waiting"]),
+			castStatsValue(stats["current-watching"]),
+			castStatsValue(stats["current-using"]),
 		)
-		fmt.Printf(lf, t.Name, pf, wf, jf)
+		fmt.Printf(lf, t.Name, pf, jf, wf)
 	}
 }
 
