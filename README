@@ -1,0 +1,27 @@
+
+BSA
+-- Console based administration tool for beanstalkd.
+
+Synopsis
+--------
+Bsa is an interactive console based tool for beanstalkd[0] and allows to
+run common administration tasks like inspecting tubes and jobs, clearing
+a tube or kicking all jobs in a tube. It has history and autocompletion
+support.
+
+[0] https://kr.github.io/beanstalkd
+
+Install the tool, then run it.
+$ bsa
+
+This will connect you to a local beanstalkd server on the default port.
+beanstalkd >
+
+To get an overview of available commands type 'help' and press enter.
+beanstalkd > help
+
+Copyright & License
+-------------------
+Cute is Copyright (c) 2014 David Persson if not otherwise stated. The code
+is distributed under the terms of the BSD 3-clause License. For the full
+license text see the LICENSE file.
