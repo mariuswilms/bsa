@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/kr/beanstalk"
 	"sort"
 	"strconv"
 )
@@ -38,4 +39,16 @@ func contains(n string, h []string) bool {
 		}
 	}
 	return false
+}
+
+func peekState(t beanstalk.Tube, state string) (id uint64, body []byte, err error) {
+	switch state {
+	case "ready":
+		return t.PeekReady()
+	case "delayed":
+		return t.PeekDelayed()
+	case "buried":
+		return t.PeekBuried()
+	}
+	return
 }

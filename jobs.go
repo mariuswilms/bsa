@@ -20,18 +20,7 @@ func nextJobs(state string) {
 	for _, t := range ctubes {
 		fmt.Printf("Next %s job in %s:\n", state, t.Name)
 
-		pf := func() (id uint64, body []byte, err error) {
-			switch state {
-			case "ready":
-				return t.PeekReady()
-			case "delayed":
-				return t.PeekDelayed()
-			case "buried":
-				return t.PeekBuried()
-			}
-			return
-		}
-		if id, body, err := pf(); err == nil {
+		if id, body, err := peekState(t, state); err == nil {
 			stats, _ := conn.StatsJob(id)
 			printJob(id, body, stats)
 			fmt.Println()

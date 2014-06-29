@@ -73,19 +73,8 @@ func clearTubes(state string) {
 	cnt := 0
 
 	for _, t := range ctubes {
-		pf := func(state string) (id uint64, body []byte, err error) {
-			switch state {
-			case "ready":
-				return t.PeekReady()
-			case "delayed":
-				return t.PeekDelayed()
-			case "buried":
-				return t.PeekBuried()
-			}
-			return
-		}
 		for {
-			if id, _, err := pf(state); err == nil {
+			if id, _, err := peekState(t, state); err == nil {
 				if err := conn.Delete(id); err != nil {
 					panic(fmt.Sprintf("Failed deleting job %v.\n", id))
 				}
