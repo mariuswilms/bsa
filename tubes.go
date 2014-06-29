@@ -46,39 +46,32 @@ func kickTube(name string, bound int) {
 }
 
 func clearTube(name string, state string) {
-	conn.TubeSet = *beanstalk.NewTubeSet(conn, name)
+	tube := beanstalk.Tube{conn, name}
+	cnt := 0
 
 	pf := func(state string) (id uint64, body []byte, err error) {
 		switch state {
 		case "ready":
-			return conn.PeekReady()
+			return tube.PeekReady()
 		case "delayed":
-			return conn.PeekDelayed()
+			return tube.PeekDelayed()
 		case "buried":
-			return conn.PeekBuried()
+			return tube.PeekBuried()
 		}
 		return
 	}
 
-	if state == "*" {
-		for _, s := range []string{"ready", "delayed", "buried"} {
-			for {
-				if id, _, err := pf(s); err != nil {
-					conn.Delete(id)
-					break
-				}
+	for {
+		if id, _, err := pf(state); err == nil {
+			if err := conn.Delete(id); err != nil {
+				panic(fmt.Sprintf("Failed deleting job %v\n", id))
 			}
-			fmt.Printf("Tube %s cleared all jobs in state %s.\n", name, s)
+			cnt++
+		} else {
+			break
 		}
-	} else {
-		for {
-			if id, _, err := pf(state); err != nil {
-				conn.Delete(id)
-				break
-			}
-		}
-		fmt.Printf("Tube %s cleared all jobs in state %s.\n", name, state)
 	}
+	fmt.Printf("Tube %s cleared, %d %s jobs %s deleted.\n", name, cnt, state)
 }
 
 func printTubeJobSection(t string, tubeStats map[string]string) {
