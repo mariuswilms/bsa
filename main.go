@@ -140,8 +140,12 @@ func main() {
 		// We may have a new set of selected tubes after an iteration, update prompt.
 		// Show selected tubes in prompt, so that we know what commands operate on.
 		var names []string
-		for _, t := range ctubes {
-			names = append(names, t.Name)
+		if len(ctubes) > 0 {
+			for _, t := range ctubes {
+				names = append(names, t.Name)
+			}
+		} else {
+			names = append(names, "*")
 		}
 		prompt := fmt.Sprintf("beanstalkd [%s] > ", strings.Join(names, ", "))
 
