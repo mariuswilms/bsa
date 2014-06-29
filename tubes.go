@@ -93,6 +93,6 @@ func clearTubes(state string) {
 				break
 			}
 		}
-		fmt.Printf("Tube %s cleared, %d %s jobs %s deleted.\n", t.Name, cnt, state)
+		fmt.Printf("Tube %s cleared, %d %s jobs deleted.\n", t.Name, cnt, state)
 	}
 }
