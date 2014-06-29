@@ -150,7 +150,7 @@ func main() {
 
 				parts := strings.Split(input, " ")
 				if len(parts) < 2 { // state is optional
-					fmt.Printf("Error: no tube name.\n")
+					fmt.Printf("Error: no tube name given.\n")
 					continue
 				}
 				if len(parts) > 1 {
