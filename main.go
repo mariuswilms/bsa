@@ -150,8 +150,8 @@ func main() {
 				var state string = "buried"
 
 				parts := strings.Split(input, " ")
-				if len(parts) < 3 {
-					fmt.Printf("Error: no tube name or state given.\n")
+				if len(parts) < 2 { // state is optional
+					fmt.Printf("Error: no tube name.\n")
 					continue
 				}
 				if len(parts) > 1 {
