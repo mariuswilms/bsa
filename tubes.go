@@ -52,6 +52,7 @@ func listTubes() {
 		)
 		fmt.Printf(lf, t.Name, pf, jf, wf)
 	}
+	fmt.Println()
 }
 
 func kickTubes(bound int) {
