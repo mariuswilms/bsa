@@ -53,26 +53,6 @@ func pauseTubes(delay time.Duration) {
 	}
 }
 
-func buryTubes() {
-	for _, t := range ctubes {
-		for {
-			if id, _, err := t.PeekReady(); err == nil {
-				conn.Bury(id, 0)
-			} else {
-				break
-			}
-		}
-		for {
-			if id, _, err := t.PeekDelayed(); err == nil {
-				conn.Bury(id, 0)
-			} else {
-				break
-			}
-		}
-		fmt.Printf("Buried all jobs in tube %s.\n", t.Name)
-	}
-}
-
 func clearTubes(state string) {
 	cnt := 0
 
