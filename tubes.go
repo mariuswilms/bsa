@@ -79,6 +79,11 @@ func printTubeJobSection(t string, tubeStats map[string]string) {
 	var body []byte
 	var err error
 
+	fmt.Printf("*** %v %s jobs", tubeStats[fmt.Sprintf("current-jobs-%s", t)], t)
+	if t == "ready" {
+		fmt.Printf(", %v urgent", tubeStats["current-jobs-urgent"])
+	}
+
 	switch t {
 	case "ready":
 		id, body, err = conn.Tube.PeekReady()
@@ -88,10 +93,12 @@ func printTubeJobSection(t string, tubeStats map[string]string) {
 		id, body, err = conn.Tube.PeekBuried()
 	}
 	if err != nil {
+		fmt.Print("\n")
 		return
 	}
 	stats, _ := conn.StatsJob(id)
 
-	fmt.Printf("\n-- Next %s job\n", t)
+	fmt.Print("; previewing next job:\n\n")
 	printJob(id, body, stats)
+	fmt.Print("\n")
 }
