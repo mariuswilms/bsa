@@ -35,9 +35,9 @@ var (
 
 func help() {
 	fmt.Printf(`
-
-bury <job>
-	Buries a single job.
+bury [<job>]
+	Buries a single job or if no job is given any ready
+	or delayed jobs in selected tubes.
 
 clear <state>
 	Deletes all jobs in given state and selected tubes.
@@ -213,11 +213,11 @@ func main() {
 				inspectJob(uint64(r))
 			case "bury":
 				if len(parts) < 2 {
-					fmt.Printf("Error: no job id given.\n")
-					continue
+					buryTubes()
+				} else {
+					r, _ := strconv.ParseInt(parts[1], 0, 0)
+					buryJob(uint64(r))
 				}
-				r, _ := strconv.ParseInt(parts[1], 0, 0)
-				buryJob(uint64(r))
 			default:
 				fmt.Println("Error: unknown command.")
 				continue

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strconv"
 )
 
 func printStats(data map[string]string, whitelist []string) {
@@ -26,4 +27,9 @@ func printStats(data map[string]string, whitelist []string) {
 	for i := range keys {
 		fmt.Printf("%25s: %s\n", keys[i], data[keys[i]])
 	}
+}
+
+func castStatsValue(v string) int {
+	r, _ := strconv.ParseUint(v, 0, 0)
+	return int(r)
 }

@@ -2,15 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 )
-
-func castStatsValue(v string) int {
-	r, _ := strconv.ParseUint(v, 0, 0)
-	return int(r)
-}
 
 // FIXME Calculate mean values?
 func listTubes() {
@@ -56,6 +50,26 @@ func pauseTubes(delay time.Duration) {
 	for _, t := range ctubes {
 		t.Pause(delay)
 		fmt.Printf("Paused tube %s for %v.\n", t.Name, delay)
+	}
+}
+
+func buryTubes() {
+	for _, t := range ctubes {
+		for {
+			if id, _, err := t.PeekReady(); err == nil {
+				conn.Bury(id, 0)
+			} else {
+				break
+			}
+		}
+		for {
+			if id, _, err := t.PeekDelayed(); err == nil {
+				conn.Bury(id, 0)
+			} else {
+				break
+			}
+		}
+		fmt.Printf("Buried all jobs in tube %s.\n", t.Name)
 	}
 }
 
