@@ -113,13 +113,13 @@ func main() {
 		}
 		if strings.HasPrefix(line, "use") {
 			tns, _ := conn.ListTubes()
-			for _, tn := range tns {
-				c = append(c, fmt.Sprintf("%s%s", line, tn))
+			for _, v := range tns {
+				c = append(c, fmt.Sprintf("%s%s", line, v))
 			}
 		}
 		if strings.HasPrefix(line, "clear") || strings.HasPrefix(line, "next") {
 			for _, v := range []string{"ready", "delayed", "buried"} {
-				c = append(c, fmt.Sprintf("%s %s", "clear", v))
+				c = append(c, fmt.Sprintf("%s%s", line, v))
 			}
 		}
 		return c
