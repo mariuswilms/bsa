@@ -228,6 +228,8 @@ func main() {
 					continue
 				}
 				inspectJob(uint64(r))
+			case "":
+				continue
 			default:
 				fmt.Println("Error: unknown command.")
 				continue
