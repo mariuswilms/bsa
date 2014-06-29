@@ -15,15 +15,15 @@ Install the tool, then run it.
 $ bsa
 
 This will connect you to a local beanstalkd server on the default port.
-beanstalkd >
+beanstalkd [*] >
 
 To get an overview of available commands type 'help' and press enter.
-beanstalkd > help
+beanstalkd [*] > help
 
-Bsa can operate on single and multiple tubes, to select a set of tubes to
-work with use the 'use' command. This makes it easy to i.e. clear a set of
-tubes' buried jobs all at once.
-beanstalkd > use fix flux
+Bsa can operate on single, multiple or all tubes, to select a set of tubes
+to work with use the 'use' command. This way clearing buried jobs from
+multiple tubes becomes very easy.
+beanstalkd [*] > use fix flux
 beanstalkd [fix, flux] > clear buried
 
 The 'list' command shows the status of each selected tube - or if none
