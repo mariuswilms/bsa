@@ -85,12 +85,11 @@ func cleanup() {
 }
 
 func main() {
-	fmt.Print("Enter 'help' for available commands and 'exit' to quit.\n\n")
-
-	// Setup connection to server.
 	var err error
 	if conn, err = beanstalk.Dial("tcp", "127.0.0.1:11300"); err != nil {
-		panic("Failed to connect to beanstalkd server.")
+		fmt.Println("Fatal: failed to connect to beanstalkd server.")
+		cleanup()
+		os.Exit(1)
 	}
 
 	// Register signal handler.
@@ -133,6 +132,8 @@ func main() {
 		line.ReadHistory(f)
 		f.Close()
 	}
+
+	fmt.Print("Enter 'help' for available commands and 'exit' to quit.\n\n")
 
 	// Dispatch commands.
 	for {
