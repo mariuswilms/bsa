@@ -20,6 +20,12 @@ beanstalkd >
 To get an overview of available commands type 'help' and press enter.
 beanstalkd > help
 
+Bsa can operate on single and multiple tubes, to select the a set of tubes
+to work with use the 'use' command. This makes it easy to i.e. clear a set
+of tubes' buried jobs all at once.
+beanstalkd > use fix flux
+beanstalkd [fix, flux] > clear buried
+
 Copyright & License
 -------------------
 Cute is Copyright (c) 2014 David Persson if not otherwise stated. The code
