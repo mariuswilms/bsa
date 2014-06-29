@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/kr/beanstalk"
 	"github.com/peterh/liner"
-	"log"
 	"os"
 	"os/signal"
 	"strconv"
@@ -80,7 +79,7 @@ func main() {
 	signal.Notify(sigc, os.Interrupt)
 	go func() {
 		for sig := range sigc {
-			log.Printf("Caught %v.", sig)
+			fmt.Printf("Caught %v.\n", sig)
 
 			cleanup()
 			os.Exit(1)
