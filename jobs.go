@@ -18,9 +18,9 @@ func inspectJob(id uint64) (err error) {
 
 func nextJobs(state string) {
 	for _, t := range ctubes {
-		fmt.Printf("Next %s job in %s:\n", state, t.Name)
-
 		if id, body, err := peekState(t, state); err == nil {
+			fmt.Printf("Next %s job in %s:\n", state, t.Name)
+
 			stats, _ := conn.StatsJob(id)
 			printJob(id, body, stats)
 			fmt.Println()
