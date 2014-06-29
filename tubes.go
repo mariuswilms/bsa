@@ -7,10 +7,8 @@ import (
 
 func listTubes() {
 	tubes, _ := conn.ListTubes()
-
-	fmt.Print("== Tubes\n")
 	for _, v := range tubes {
-		fmt.Printf("- %s\n", v)
+		fmt.Printf("%s\n", v)
 	}
 }
 
@@ -18,14 +16,22 @@ func inspectTube(name string) {
 	tube := beanstalk.Tube{conn, name}
 	stats, _ := tube.Stats()
 
-	fmt.Printf("== Tube %s\n", name)
+	fmt.Print("General:\n")
 	printStats(stats, []string{
-		"total-jobs",
 		"pause",
 		"pause-time-left",
+	})
+	fmt.Print("Jobs:\n")
+	printStats(stats, []string{
+		"total-jobs",
+	})
+	fmt.Print("Workers:\n")
+	printStats(stats, []string{
+		"current-waiting",
 		"current-watching",
 		"current-using",
 	})
+	fmt.Print("\n")
 
 	printTubeJobSection("ready", stats)
 	printTubeJobSection("delayed", stats)

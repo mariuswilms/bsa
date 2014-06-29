@@ -7,8 +7,6 @@ import (
 func inspectJob(id uint64) {
 	body, _ := conn.Peek(id)
 	stats, _ := conn.StatsJob(id)
-
-	fmt.Printf("== Job %v", id)
 	printJob(id, body, stats)
 }
 
