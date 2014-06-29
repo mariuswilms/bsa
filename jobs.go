@@ -41,7 +41,6 @@ func printJob(id uint64, body []byte, stats map[string]string) {
 		"releases",
 		"pri",
 		"ttr",
-		"time-left",
 		"timeouts",
 		"buries",
 	}
