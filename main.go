@@ -162,17 +162,22 @@ func main() {
 					ctubes = append(ctubes, beanstalk.Tube{conn, n})
 				}
 			case "list":
-				if len(ctubes) == 1 {
+				var reset bool = false
+
+				if len(ctubes) == 0 {
 					// Temporarily select all tubes.
 					tubes, _ := conn.ListTubes()
 					for _, n := range tubes {
 						ctubes = append(ctubes, beanstalk.Tube{conn, n})
 					}
+					reset = true
 				}
 				listTubes()
 
-				// Revert temporary selection back again.
-				ctubes = ctubes[:0]
+				if reset {
+					// Revert temporary selection back again.
+					ctubes = ctubes[:0]
+				}
 			case "pause":
 				if len(parts) < 2 {
 					fmt.Printf("Error: no delay given.\n")
