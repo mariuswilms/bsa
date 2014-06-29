@@ -6,19 +6,12 @@ import (
 	"strconv"
 )
 
+// Helper function to print statistics. Can use whitelist
+// if provided. Otherwise will print all keys.
 func printStats(data map[string]string, whitelist []string) {
-	isIn := func(n string, h []string) bool {
-		for _, v := range h {
-			if v == n {
-				return true
-			}
-		}
-		return false
-	}
-
 	keys := make([]string, 0, len(data))
 	for k := range data {
-		if whitelist == nil || isIn(k, whitelist) {
+		if whitelist == nil || contains(k, whitelist) {
 			keys = append(keys, k)
 		}
 	}
@@ -29,7 +22,20 @@ func printStats(data map[string]string, whitelist []string) {
 	}
 }
 
+// Helper function to convert integers from
+// strings as returned by stats commands.
 func castStatsValue(v string) int {
 	r, _ := strconv.ParseUint(v, 0, 0)
 	return int(r)
+}
+
+// Helper function to check if a given string is contained in an slice of
+// strings.
+func contains(n string, h []string) bool {
+	for _, v := range h {
+		if v == n {
+			return true
+		}
+	}
+	return false
 }

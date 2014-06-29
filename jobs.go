@@ -4,15 +4,16 @@ import (
 	"fmt"
 )
 
-func inspectJob(id uint64) {
-	body, _ := conn.Peek(id)
+func inspectJob(id uint64) (err error) {
+	body, err := conn.Peek(id)
 	stats, _ := conn.StatsJob(id)
-	printJob(id, body, stats)
-}
 
-func buryJob(id uint64) {
-	conn.Bury(id, 0)
-	fmt.Printf("Buried job %v.\n", id)
+	if err != nil {
+		return fmt.Errorf("Unknown job %v", id)
+	}
+	printJob(id, body, stats)
+
+	return
 }
 
 func nextJobs(state string) {
@@ -28,12 +29,13 @@ func nextJobs(state string) {
 			case "buried":
 				return t.PeekBuried()
 			}
-			return 0, nil, fmt.Errorf("Unknown state %s", state)
+			return
 		}
-		id, body, _ := pf()
-		stats, _ := conn.StatsJob(id)
-		printJob(id, body, stats)
-		fmt.Println()
+		if id, body, err := pf(); err == nil {
+			stats, _ := conn.StatsJob(id)
+			printJob(id, body, stats)
+			fmt.Println()
+		}
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 )
 
 var (
+	// Used for autocompletion.
 	commands = []string{
 		"clear",
 		"help",
@@ -25,13 +26,14 @@ var (
 		"stats",
 		"use",
 	}
-	historyFile = "/tmp/.bsa_history"
-	conn        *beanstalk.Conn
-	line        *liner.State
-	sigc        chan os.Signal
-	ctubes      []beanstalk.Tube // The currently selected tubes.
+	hf     = "/tmp/.bsa_history"
+	conn   *beanstalk.Conn // Our one and only beanstalkd connection.
+	line   *liner.State
+	sigc   chan os.Signal   // Signal channel.
+	ctubes []beanstalk.Tube // The currently selected tubes.
 )
 
+// Prints help and usage.
 func help() {
 	fmt.Printf(`
 clear <state>
@@ -75,7 +77,7 @@ use [<tube0>] [<tube1> ...]
 func cleanup() {
 	conn.Close()
 
-	if f, err := os.Create(historyFile); err == nil {
+	if f, err := os.Create(hf); err == nil {
 		line.WriteHistory(f)
 		f.Close()
 	}
@@ -84,7 +86,11 @@ func cleanup() {
 
 func main() {
 	fmt.Print("Enter 'help' for available commands and 'exit' to quit.\n\n")
-	conn, _ = beanstalk.Dial("tcp", "127.0.0.1:11300")
+
+	var err error
+	if conn, err = beanstalk.Dial("tcp", "127.0.0.1:11300"); err != nil {
+		panic("Failed to connect to beanstalkd server.")
+	}
 	line = liner.NewLiner()
 	sigc = make(chan os.Signal, 1)
 
@@ -106,22 +112,21 @@ func main() {
 			}
 		}
 		if strings.HasPrefix(line, "use") {
-			tubes, _ := conn.ListTubes()
-			for _, t := range tubes {
-				c = append(c, fmt.Sprintf("%s%s", line, t))
+			tns, _ := conn.ListTubes()
+			for _, tn := range tns {
+				c = append(c, fmt.Sprintf("%s%s", line, tn))
 			}
 		}
 		if strings.HasPrefix(line, "clear") || strings.HasPrefix(line, "next") {
-			states := []string{"ready", "delayed", "buried"}
-			for _, s := range states {
-				c = append(c, fmt.Sprintf("%s %s", "clear", s))
+			for _, v := range []string{"ready", "delayed", "buried"} {
+				c = append(c, fmt.Sprintf("%s %s", "clear", v))
 			}
 		}
 		return c
 	})
 
-	// Load console history.
-	if f, err := os.Open(historyFile); err == nil {
+	// Load console history if possible.
+	if f, err := os.Open(hf); err == nil {
 		line.ReadHistory(f)
 		f.Close()
 	}
@@ -137,9 +142,13 @@ func main() {
 		prompt := fmt.Sprintf("beanstalkd [%s] > ", strings.Join(names, ", "))
 
 		if input, err := line.Prompt(prompt); err == nil {
-			parts := strings.Split(input, " ")
+			// Always add input to history, even if it contains a syntax error. We
+			// may want to skip back and correct ourselves.
+			line.AppendHistory(input)
 
-			switch parts[0] {
+			args := strings.Split(input, " ")
+
+			switch args[0] {
 			case "exit", "quit":
 				cleanup()
 				os.Exit(0)
@@ -150,22 +159,23 @@ func main() {
 			case "use":
 				ctubes = ctubes[:0]
 
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					continue // Just reset.
 				}
-				for _, n := range parts[1:] {
-					ctubes = append(ctubes, beanstalk.Tube{conn, n})
+				if err := useTubes(args[1:]); err != nil {
+					fmt.Printf("Error: %s.\n", err)
 				}
 			case "list":
 				var reset bool = false
 
 				if len(ctubes) == 0 {
 					// Temporarily select all tubes.
-					tubes, _ := conn.ListTubes()
-					for _, n := range tubes {
-						ctubes = append(ctubes, beanstalk.Tube{conn, n})
-					}
 					reset = true
+
+					// Do not need to check if tubes are valid names as we just
+					// use the list of available ones.
+					tns, _ := conn.ListTubes()
+					useTubes(tns)
 				}
 				listTubes()
 
@@ -174,43 +184,54 @@ func main() {
 					ctubes = ctubes[:0]
 				}
 			case "pause":
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					fmt.Printf("Error: no delay given.\n")
 					continue
 				}
-				r, _ := strconv.ParseUint(parts[1], 0, 0)
+				r, err := strconv.ParseUint(args[1], 0, 0)
+				if err != nil {
+					fmt.Printf("Error: given delay is not a valid number.\n")
+					continue
+				}
 				pauseTubes(time.Duration(r) * time.Second)
 			case "kick":
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					fmt.Printf("Error: no bound given.\n")
 					continue
 				}
-				r, _ := strconv.ParseInt(parts[1], 0, 0)
+				r, err := strconv.ParseUint(args[1], 0, 0)
+				if err != nil {
+					fmt.Printf("Error: given bound is not a valid number.\n")
+					continue
+				}
 				kickTubes(int(r))
 			case "clear":
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					fmt.Printf("Error: no state given.\n")
 					continue
 				}
-				clearTubes(parts[1])
+				clearTubes(args[1])
 			case "next":
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					fmt.Printf("Error: no state given.\n")
 					continue
 				}
-				nextJobs(parts[1])
+				nextJobs(args[1])
 			case "inspect":
-				if len(parts) < 2 {
+				if len(args) < 2 {
 					fmt.Printf("Error: no job id given.\n")
 					continue
 				}
-				r, _ := strconv.ParseInt(parts[1], 0, 0)
+				r, err := strconv.ParseUint(args[1], 0, 0)
+				if err != nil {
+					fmt.Printf("Error: not a valid job id.\n")
+					continue
+				}
 				inspectJob(uint64(r))
 			default:
 				fmt.Println("Error: unknown command.")
 				continue
 			}
-			line.AppendHistory(input)
 		}
 	}
 }

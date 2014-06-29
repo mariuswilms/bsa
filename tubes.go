@@ -2,11 +2,26 @@ package main
 
 import (
 	"fmt"
+	"github.com/kr/beanstalk"
 	"strings"
 	"time"
 )
 
-// FIXME Calculate mean values?
+// Selects tubes and validates each tube name before doing so.
+func useTubes(tns []string) (err error) {
+	ctubes = ctubes[:0]
+	atns, _ := conn.ListTubes()
+
+	for _, tn := range tns {
+		if !contains(tn, atns) {
+			return fmt.Errorf("Invalid tube %s", tn)
+		}
+		ctubes = append(ctubes, beanstalk.Tube{conn, tn})
+	}
+	return
+}
+
+// Prints most important statistics for each tube.
 func listTubes() {
 	lf := "%20s %10s %30s %30s\n"
 
