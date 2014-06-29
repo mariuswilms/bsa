@@ -2,109 +2,88 @@ package main
 
 import (
 	"fmt"
-	"github.com/kr/beanstalk"
+	"strconv"
+	"strings"
 	"time"
 )
 
+func castStatsValue(v string) int {
+	r, _ := strconv.ParseUint(v, 0, 0)
+	return int(r)
+}
+
+// FIXME Calculate mean values?
 func listTubes() {
-	tubes, _ := conn.ListTubes()
-	for _, v := range tubes {
-		fmt.Printf("%s\n", v)
+	lf := "%20s %10s %30s %30s\n"
+
+	fmt.Printf(lf, "", "paused", "ready/delayed/buried", "waiting/watching/using")
+	fmt.Println(strings.Repeat("-", 93))
+
+	for _, t := range ctubes {
+		var pf, wf, jf string
+		stats, _ := t.Stats()
+
+		if stats["pause"] == "0" {
+			pf = "-"
+		} else {
+			pf = fmt.Sprintf("%ss", stats["pause-time-left"])
+		}
+		jf = fmt.Sprintf(
+			"%d (%d) / %d / %d",
+			castStatsValue(stats["current-jobs-ready"]),
+			castStatsValue(stats["current-jobs-urgent"]),
+			castStatsValue(stats["current-jobs-delayed"]),
+			castStatsValue(stats["current-jobs-buried"]),
+		)
+		wf = fmt.Sprintf(
+			"%d / %d / %d",
+			castStatsValue(stats["current-jobs-waiting"]),
+			castStatsValue(stats["current-jobs-watching"]),
+			castStatsValue(stats["current-jobs-using"]),
+		)
+		fmt.Printf(lf, t.Name, pf, wf, jf)
 	}
 }
 
-func inspectTube(name string) {
-	tube := beanstalk.Tube{conn, name}
-	stats, _ := tube.Stats()
-
-	fmt.Print("General:\n")
-	printStats(stats, []string{
-		"pause",
-		"pause-time-left",
-	})
-	fmt.Print("Jobs:\n")
-	printStats(stats, []string{
-		"total-jobs",
-	})
-	fmt.Print("Workers:\n")
-	printStats(stats, []string{
-		"current-waiting",
-		"current-watching",
-		"current-using",
-	})
-	fmt.Print("\n")
-
-	printTubeJobSection("ready", stats)
-	printTubeJobSection("delayed", stats)
-	printTubeJobSection("buried", stats)
+func kickTubes(bound int) {
+	for _, t := range ctubes {
+		t.Kick(bound)
+		fmt.Printf("Kicked jobs in tube %s.\n", t.Name)
+	}
 }
 
-func kickTube(name string, bound int) {
-	tube := beanstalk.Tube{conn, name}
-	tube.Kick(bound)
-	fmt.Printf("Kicked jobs in tube %s.\n", name)
+func pauseTubes(delay time.Duration) {
+	for _, t := range ctubes {
+		t.Pause(delay)
+		fmt.Printf("Paused tube %s for %v.\n", t.Name, delay)
+	}
 }
 
-func pauseTube(name string, delay time.Duration) {
-	tube := beanstalk.Tube{conn, name}
-	tube.Pause(delay)
-	fmt.Printf("Paused tube %s for %v.\n", name, delay)
-}
-
-func clearTube(name string, state string) {
-	tube := beanstalk.Tube{conn, name}
+func clearTubes(state string) {
 	cnt := 0
 
-	pf := func(state string) (id uint64, body []byte, err error) {
-		switch state {
-		case "ready":
-			return tube.PeekReady()
-		case "delayed":
-			return tube.PeekDelayed()
-		case "buried":
-			return tube.PeekBuried()
-		}
-		return
-	}
-
-	for {
-		if id, _, err := pf(state); err == nil {
-			if err := conn.Delete(id); err != nil {
-				panic(fmt.Sprintf("Failed deleting job %v\n", id))
+	for _, t := range ctubes {
+		pf := func(state string) (id uint64, body []byte, err error) {
+			switch state {
+			case "ready":
+				return t.PeekReady()
+			case "delayed":
+				return t.PeekDelayed()
+			case "buried":
+				return t.PeekBuried()
 			}
-			cnt++
-		} else {
-			break
+			return
 		}
+		for {
+			if id, _, err := pf(state); err == nil {
+				if err := conn.Delete(id); err != nil {
+					panic(fmt.Sprintf("Failed deleting job %v.\n", id))
+				}
+				cnt++
+			} else {
+				break
+			}
+		}
+		fmt.Printf("Tube %s cleared, %d %s jobs %s deleted.\n", t.Name, cnt, state)
 	}
-	fmt.Printf("Tube %s cleared, %d %s jobs %s deleted.\n", name, cnt, state)
-}
-
-func printTubeJobSection(t string, tubeStats map[string]string) {
-	var id uint64
-	var body []byte
-	var err error
-
-	fmt.Printf("*** %v %s jobs", tubeStats[fmt.Sprintf("current-jobs-%s", t)], t)
-	if t == "ready" {
-		fmt.Printf(", %v urgent", tubeStats["current-jobs-urgent"])
-	}
-
-	switch t {
-	case "ready":
-		id, body, err = conn.Tube.PeekReady()
-	case "delayed":
-		id, body, err = conn.Tube.PeekDelayed()
-	case "buried":
-		id, body, err = conn.Tube.PeekBuried()
-	}
-	if err != nil {
-		fmt.Print("\n")
-		return
-	}
-	stats, _ := conn.StatsJob(id)
-
-	fmt.Print("; previewing next job:\n\n")
-	printJob(id, body, stats)
-	fmt.Print("\n")
 }
