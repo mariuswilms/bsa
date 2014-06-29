@@ -191,23 +191,21 @@ func main() {
 					fmt.Printf("Error: no delay given.\n")
 					continue
 				}
-				r, err := strconv.ParseUint(args[1], 0, 0)
-				if err != nil {
-					fmt.Printf("Error: given delay is not a valid number.\n")
+				if r, err := strconv.ParseUint(args[1], 0, 0); err == nil {
+					pauseTubes(time.Duration(r) * time.Second)
 					continue
 				}
-				pauseTubes(time.Duration(r) * time.Second)
+				fmt.Printf("Error: given delay is not a valid number.\n")
 			case "kick":
 				if len(args) < 2 {
 					fmt.Printf("Error: no bound given.\n")
 					continue
 				}
-				r, err := strconv.ParseUint(args[1], 0, 0)
-				if err != nil {
-					fmt.Printf("Error: given bound is not a valid number.\n")
+				if r, err := strconv.ParseUint(args[1], 0, 0); err == nil {
+					kickTubes(int(r))
 					continue
 				}
-				kickTubes(int(r))
+				fmt.Printf("Error: given bound is not a valid number.\n")
 			case "clear":
 				if len(args) < 2 {
 					fmt.Printf("Error: no state given.\n")
@@ -225,12 +223,11 @@ func main() {
 					fmt.Printf("Error: no job id given.\n")
 					continue
 				}
-				r, err := strconv.ParseUint(args[1], 0, 0)
-				if err != nil {
-					fmt.Printf("Error: not a valid job id.\n")
+				if r, err := strconv.ParseUint(args[1], 0, 0); err == nil {
+					inspectJob(uint64(r))
 					continue
 				}
-				inspectJob(uint64(r))
+				fmt.Printf("Error: not a valid job id.\n")
 			case "":
 				continue
 			default:
