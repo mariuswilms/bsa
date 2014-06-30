@@ -29,7 +29,7 @@ var (
 	hf     = "/tmp/.bsa_history"
 	conn   *beanstalk.Conn // Our one and only beanstalkd connection.
 	line   *liner.State
-	ctubes Tubes
+	cTubes Tubes
 	sigc   chan os.Signal // Signal channel.
 )
 
@@ -91,7 +91,7 @@ func main() {
 		cleanup()
 		os.Exit(1)
 	}
-	ctubes.UseAll()
+	cTubes.UseAll()
 
 	// Register signal handler.
 	sigc = make(chan os.Signal, 1)
@@ -142,10 +142,10 @@ func main() {
 		// Show selected tubes in prompt, so that we know what commands operate on.
 
 		var tStatus string
-		if ctubes.All {
+		if cTubes.All {
 			tStatus = "*"
 		} else {
-			tStatus = strings.Join(ctubes.Names, ", ")
+			tStatus = strings.Join(cTubes.Names, ", ")
 		}
 		prompt := fmt.Sprintf("beanstalkd [%s] > ", tStatus)
 
@@ -166,10 +166,10 @@ func main() {
 				stats()
 			case "use":
 				if len(args) < 2 || args[1] == "*" {
-					ctubes.UseAll()
+					cTubes.UseAll()
 					continue
 				}
-				ctubes.Use(args[1:])
+				cTubes.Use(args[1:])
 			case "list":
 				listTubes()
 			case "pause":

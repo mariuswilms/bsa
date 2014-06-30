@@ -49,7 +49,7 @@ func listTubes() {
 	fmt.Printf(lf, "", "paused", "ready/delayed/buried", "waiting/watching/using")
 	fmt.Println(strings.Repeat("-", 93))
 
-	for _, t := range ctubes.Conns {
+	for _, t := range cTubes.Conns {
 		var pf, wf, jf string
 		stats, _ := t.Stats()
 
@@ -77,14 +77,14 @@ func listTubes() {
 }
 
 func kickTubes(bound int) {
-	for _, t := range ctubes.Conns {
+	for _, t := range cTubes.Conns {
 		t.Kick(bound)
 		fmt.Printf("Kicked jobs in tube %s.\n", t.Name)
 	}
 }
 
 func pauseTubes(delay time.Duration) {
-	for _, t := range ctubes.Conns {
+	for _, t := range cTubes.Conns {
 		t.Pause(delay)
 		fmt.Printf("Paused tube %s for %v.\n", t.Name, delay)
 	}
@@ -93,7 +93,7 @@ func pauseTubes(delay time.Duration) {
 func clearTubes(state string) {
 	cnt := 0
 
-	for _, t := range ctubes.Conns {
+	for _, t := range cTubes.Conns {
 		for {
 			if id, _, err := peekState(t, state); err == nil {
 				if err := conn.Delete(id); err != nil {

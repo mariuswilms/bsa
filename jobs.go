@@ -17,7 +17,7 @@ func inspectJob(id uint64) (err error) {
 }
 
 func nextJobs(state string) {
-	for _, t := range ctubes.Conns {
+	for _, t := range cTubes.Conns {
 		if id, body, err := peekState(t, state); err == nil {
 			fmt.Printf("Next %s job in %s:\n", state, t.Name)
 
