@@ -7,16 +7,37 @@ import (
 	"time"
 )
 
-// Selects tubes and validates each tube name before doing so.
-func useTubes(tns []string) (err error) {
-	ctubes = ctubes[:0]
-	atns, _ := conn.ListTubes()
+type Tubes struct {
+	Names []string
+	Conns []beanstalk.Tube
+	All   bool // Flag indicating if all available tubes are represented.
+}
+
+func (ts *Tubes) Reset() {
+	ts.Conns = ts.Conns[:0]
+	ts.Names = ts.Names[:0]
+}
+
+// Selects tubes.
+func (ts *Tubes) Use(tns []string) {
+	ts.Reset()
+	ts.All = false
 
 	for _, tn := range tns {
-		if !contains(tn, atns) {
-			return fmt.Errorf("Invalid tube %s", tn)
-		}
-		ctubes = append(ctubes, beanstalk.Tube{conn, tn})
+		ts.Conns = append(ts.Conns, beanstalk.Tube{conn, tn})
+		ts.Names = append(ts.Names, tn)
+	}
+	return
+}
+
+func (ts *Tubes) UseAll() {
+	ts.Reset()
+	ts.All = true
+
+	tns, _ := conn.ListTubes()
+	for _, tn := range tns {
+		ts.Conns = append(ts.Conns, beanstalk.Tube{conn, tn})
+		ts.Names = append(ts.Names, tn)
 	}
 	return
 }
@@ -28,7 +49,7 @@ func listTubes() {
 	fmt.Printf(lf, "", "paused", "ready/delayed/buried", "waiting/watching/using")
 	fmt.Println(strings.Repeat("-", 93))
 
-	for _, t := range ctubes {
+	for _, t := range ctubes.Conns {
 		var pf, wf, jf string
 		stats, _ := t.Stats()
 
@@ -56,14 +77,14 @@ func listTubes() {
 }
 
 func kickTubes(bound int) {
-	for _, t := range ctubes {
+	for _, t := range ctubes.Conns {
 		t.Kick(bound)
 		fmt.Printf("Kicked jobs in tube %s.\n", t.Name)
 	}
 }
 
 func pauseTubes(delay time.Duration) {
-	for _, t := range ctubes {
+	for _, t := range ctubes.Conns {
 		t.Pause(delay)
 		fmt.Printf("Paused tube %s for %v.\n", t.Name, delay)
 	}
@@ -72,7 +93,7 @@ func pauseTubes(delay time.Duration) {
 func clearTubes(state string) {
 	cnt := 0
 
-	for _, t := range ctubes {
+	for _, t := range ctubes.Conns {
 		for {
 			if id, _, err := peekState(t, state); err == nil {
 				if err := conn.Delete(id); err != nil {

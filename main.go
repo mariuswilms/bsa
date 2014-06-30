@@ -29,8 +29,8 @@ var (
 	hf     = "/tmp/.bsa_history"
 	conn   *beanstalk.Conn // Our one and only beanstalkd connection.
 	line   *liner.State
-	sigc   chan os.Signal   // Signal channel.
-	ctubes []beanstalk.Tube // The currently selected tubes.
+	ctubes Tubes
+	sigc   chan os.Signal // Signal channel.
 )
 
 // Prints help and usage.
@@ -91,6 +91,7 @@ func main() {
 		cleanup()
 		os.Exit(1)
 	}
+	ctubes.UseAll()
 
 	// Register signal handler.
 	sigc = make(chan os.Signal, 1)
@@ -139,15 +140,14 @@ func main() {
 	for {
 		// We may have a new set of selected tubes after an iteration, update prompt.
 		// Show selected tubes in prompt, so that we know what commands operate on.
-		var names []string
-		if len(ctubes) > 0 {
-			for _, t := range ctubes {
-				names = append(names, t.Name)
-			}
+
+		var tStatus string
+		if ctubes.All {
+			tStatus = "*"
 		} else {
-			names = append(names, "*")
+			tStatus = strings.Join(ctubes.Names, ", ")
 		}
-		prompt := fmt.Sprintf("beanstalkd [%s] > ", strings.Join(names, ", "))
+		prompt := fmt.Sprintf("beanstalkd [%s] > ", tStatus)
 
 		if input, err := line.Prompt(prompt); err == nil {
 			// Always add input to history, even if it contains a syntax error. We
@@ -165,32 +165,13 @@ func main() {
 			case "stats":
 				stats()
 			case "use":
-				ctubes = ctubes[:0]
-
-				if len(args) < 2 {
-					continue // Just reset.
+				if len(args) < 2 || args[1] == "*" {
+					ctubes.UseAll()
+					continue
 				}
-				if err := useTubes(args[1:]); err != nil {
-					fmt.Printf("Error: %s.\n", err)
-				}
+				ctubes.Use(args[1:])
 			case "list":
-				var reset bool = false
-
-				if len(ctubes) == 0 {
-					// Temporarily select all tubes.
-					reset = true
-
-					// Do not need to check if tubes are valid names as we just
-					// use the list of available ones.
-					tns, _ := conn.ListTubes()
-					useTubes(tns)
-				}
 				listTubes()
-
-				if reset {
-					// Revert temporary selection back again.
-					ctubes = ctubes[:0]
-				}
 			case "pause":
 				if len(args) < 2 {
 					fmt.Printf("Error: no delay given.\n")
