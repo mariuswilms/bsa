@@ -1,2 +1,4 @@
 src/
 bsa*
+build/
+build.sh
