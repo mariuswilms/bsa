@@ -88,7 +88,6 @@ func main() {
 	var err error
 	if conn, err = beanstalk.Dial("tcp", "127.0.0.1:11300"); err != nil {
 		fmt.Println("Fatal: failed to connect to beanstalkd server.")
-		cleanup()
 		os.Exit(1)
 	}
 	cTubes.UseAll()
