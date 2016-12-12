@@ -7,9 +7,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/kr/beanstalk"
 	"strings"
 	"time"
+
+	"github.com/kr/beanstalk"
 )
 
 type Tubes struct {

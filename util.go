@@ -7,9 +7,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/kr/beanstalk"
 	"sort"
 	"strconv"
+
+	"github.com/kr/beanstalk"
 )
 
 // Helper function to print statistics. Can use whitelist

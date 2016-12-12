@@ -7,13 +7,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/kr/beanstalk"
-	"github.com/peterh/liner"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kr/beanstalk"
+	"github.com/peterh/liner"
 )
 
 var (
