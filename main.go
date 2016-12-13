@@ -6,6 +6,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -92,8 +93,14 @@ func cleanup() {
 
 func main() {
 	var err error
-	if conn, err = beanstalk.Dial("tcp", "127.0.0.1:11300"); err != nil {
-		fmt.Println("Fatal: failed to connect to beanstalkd server.")
+	var beanstalkdHost = flag.String("host", "localhost", "beanstalkd host")
+	var beanstalkdPort = flag.String("port", "11300", "beanstalkd port")
+	var beanstalkdAddr string
+	flag.Parse()
+
+	beanstalkdAddr = *beanstalkdHost + ":" + *beanstalkdPort
+	if conn, err = beanstalk.Dial("tcp", beanstalkdAddr); err != nil {
+		fmt.Printf("Fatal: failed to connect to beanstalkd server %s\n", beanstalkdAddr)
 		os.Exit(1)
 	}
 	cTubes.UseAll()
