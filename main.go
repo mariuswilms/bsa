@@ -92,15 +92,14 @@ func cleanup() {
 }
 
 func main() {
-	var err error
-	var beanstalkdHost = flag.String("host", "localhost", "beanstalkd host")
-	var beanstalkdPort = flag.String("port", "11300", "beanstalkd port")
-	var beanstalkdAddr string
+	host := flag.String("host", "localhost", "beanstalkd host")
+	port := flag.String("port", "11300", "beanstalkd port")
 	flag.Parse()
 
-	beanstalkdAddr = *beanstalkdHost + ":" + *beanstalkdPort
-	if conn, err = beanstalk.Dial("tcp", beanstalkdAddr); err != nil {
-		fmt.Printf("Fatal: failed to connect to beanstalkd server %s\n", beanstalkdAddr)
+	addr := fmt.Sprintf("%s:%s", host, port)
+	conn, err := beanstalk.Dial("tcp", addr)
+	if err != nil {
+		fmt.Printf("Fatal: failed to connect to beanstalkd server %s\n", addr)
 		os.Exit(1)
 	}
 	cTubes.UseAll()
