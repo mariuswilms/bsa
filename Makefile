@@ -25,13 +25,11 @@ dist: dist/bsa dist/bsa-darwin-amd64 dist/bsa-linux-amd64
 $(PREFIX)/sbin/%: dist/%
 	install -m 555 $< $@
 
-dist/%:
-	go build -ldflags "$(PROG_GOFLAGS)" -o $@ ./$<
-
 dist/%-darwin-amd64: %
-	GOOS=darwin GOARCH=amd64 go build -ldflags "$(PROG_GOFLAGS)" -o $@ ./$<
+	GOOS=darwin GOARCH=amd64 go build -ldflags "$(PROG_GOFLAGS)" -o $@
 
 dist/%-linux-amd64: %
-	GOOS=linux GOARCH=amd64 go build -ldflags "$(PROG_GOFLAGS)" -o $@ ./$<
+	GOOS=linux GOARCH=amd64 go build -ldflags "$(PROG_GOFLAGS)" -o $@
 
-
+dist/%:
+	go build -ldflags "$(PROG_GOFLAGS)" -o $@
