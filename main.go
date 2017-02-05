@@ -97,11 +97,13 @@ func main() {
 	flag.Parse()
 
 	addr := fmt.Sprintf("%s:%s", *host, *port)
-	conn, err := beanstalk.Dial("tcp", addr)
+	c, err := beanstalk.Dial("tcp", addr)
 	if err != nil {
-		fmt.Printf("Fatal: failed to connect to beanstalkd server %s\n", addr)
+		fmt.Printf("Fatal: failed to connect to beanstalkd server %s: %s\n", addr, err)
 		os.Exit(1)
 	}
+	conn = c // assign to global
+
 	cTubes.UseAll()
 
 	// Register signal handler.
