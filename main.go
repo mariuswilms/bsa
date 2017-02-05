@@ -92,7 +92,7 @@ func cleanup() {
 }
 
 func main() {
-	host := flag.String("host", "localhost", "beanstalkd host")
+	host := flag.String("host", "127.0.0.1", "beanstalkd host")
 	port := flag.String("port", "11300", "beanstalkd port")
 	flag.Parse()
 
