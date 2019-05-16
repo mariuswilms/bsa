@@ -1,6 +1,0 @@
-[submodule "vendor/github.com/kr/beanstalk"]
-	path = vendor/github.com/kr/beanstalk
-	url = https://github.com/kr/beanstalk
-[submodule "vendor/github.com/peterh/liner"]
-	path = vendor/github.com/peterh/liner
-	url = https://github.com/peterh/liner
